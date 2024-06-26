@@ -1,7 +1,7 @@
 import pytest
 from typing import List, Dict
 
-# Входные данные для тестов
+# Входные данные для тестов processing.py
 @pytest.fixture
 def sample_data() -> List[Dict[str, str]]:
     return [
@@ -11,7 +11,7 @@ def sample_data() -> List[Dict[str, str]]:
         {'id': 615064591, 'state': 'CANCELED', 'date': '2018-10-14T08:21:33.419441'}
     ]
 
-# Функции для тестирования
+# Функции для тестирования processing.py
 def get_date(dictionary: Dict[str, str]) -> str:
     return dictionary["date"]
 
@@ -22,7 +22,7 @@ def filter_by_state(data: List[Dict[str, str]], state: str = "EXECUTED") -> List
     return [item for item in data if item.get("state") == state]
 
 
-# Параметризация тестов
+# Параметризация тестов processing.py
 @pytest.mark.parametrize(
     "input_data, reverse, state, expected_output",
     [
@@ -66,3 +66,23 @@ def test_sort_and_filter(input_data, reverse, state, expected_output):
 
     assert sorted_result == expected_output
     assert filtered_result == expected_output
+
+# Фикстура для подготовки данных для тестирования mask_card_number в masks.py
+@pytest.fixture
+def card_number_data():
+    return {
+        "valid_card": "1234567890123456",
+        "invalid_card_short": "123456789012",
+        "invalid_card_long": "12345678901234567890",
+        "masked_valid_card": "123456 XX** **** 3456"
+    }
+
+# Фикстура для подготовки данных для тестирования mask_account_number в masks.py
+@pytest.fixture
+def account_number_data():
+    return {
+        "valid_account": "123456",
+        "invalid_account_short": "12345",
+        "invalid_account_long": "1234567",
+        "masked_valid_account": "**3456"
+    }
