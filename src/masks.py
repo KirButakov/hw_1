@@ -4,7 +4,7 @@ def mask_card_number(card_number: str) -> str:
         return "Неверный формат номера карты"
 
     # Маскирование номера карты
-    masked_number = card_number[:6] + " XX** **** " + card_number[-4:]
+    masked_number = card_number[:4] + " " + card_number[4:6] + "** **** " + card_number[-4:]
     return masked_number
 
 

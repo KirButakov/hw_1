@@ -1,4 +1,4 @@
-from typing import List, Dict
+from typing import Dict, List
 
 
 def get_date(dictionary: Dict[str, str]) -> str:
@@ -8,9 +8,7 @@ def get_date(dictionary: Dict[str, str]) -> str:
     return dictionary["date"]
 
 
-def sort_by_date(
-    data: List[Dict[str, str]], reverse: bool = True
-) -> List[Dict[str, str]]:
+def sort_by_date(data: List[Dict[str, str]], reverse: bool = True) -> List[Dict[str, str]]:
     """
     Сортирует список словарей по убыванию даты.
 
@@ -21,9 +19,7 @@ def sort_by_date(
     return sorted(data, key=get_date, reverse=reverse)
 
 
-def filter_by_state(
-    data: List[Dict[str, str]], state: str = "EXECUTED"
-) -> List[Dict[str, str]]:
+def filter_by_state(data: List[Dict[str, str]], state: str = "EXECUTED") -> List[Dict[str, str]]:
     """
     Фильтрует список словарей по ключу 'state'.
 
