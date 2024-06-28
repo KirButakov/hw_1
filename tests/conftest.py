@@ -16,19 +16,6 @@ def sample_data() -> List[Dict[str, str]]:
     ]
 
 
-# Функции для тестирования processing.py
-def get_date(dictionary: Dict[str, str]) -> str:
-    return dictionary["date"]
-
-
-def sort_by_date(data: List[Dict[str, str]], reverse: bool = True) -> List[Dict[str, str]]:
-    return sorted(data, key=get_date, reverse=reverse)
-
-
-def filter_by_state(data: List[Dict[str, str]], state: str = "EXECUTED") -> List[Dict[str, str]]:
-    return [item for item in data if item.get("state") == state]
-
-
 # Фикстура для тестирования mask_card_number
 @pytest.fixture
 def card_numbers():
