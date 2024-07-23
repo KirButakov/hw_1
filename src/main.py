@@ -1,22 +1,56 @@
+import csv
+import json
+from collections import Counter
+
+import openpyxl
+
+
 def get_transactions_from_json():
     """
     Функция для обработки JSON-файла с транзакциями.
     """
+    with open("transactions.json", "r") as file:
+        transactions = json.load(file)
     print("Для обработки выбран JSON-файл.")
+    return transactions
 
 
 def get_transactions_from_csv():
     """
     Функция для обработки CSV-файла с транзакциями.
     """
+    transactions = []
+    with open("transactions.csv", "r") as file:
+        reader = csv.DictReader(file)
+        for row in reader:
+            transactions.append(row)
     print("Для обработки выбран CSV-файл.")
+    return transactions
 
 
 def get_transactions_from_xlsx():
     """
     Функция для обработки XLSX-файла с транзакциями.
     """
+    workbook = openpyxl.load_workbook("transactions.xlsx")
+    sheet = workbook.active
+    transactions = []
+
+    headers = [cell.value for cell in sheet[1]]
+
+    for row in sheet.iter_rows(min_row=2, values_only=True):
+        transaction = {headers[i]: row[i] for i in range(len(headers))}
+        transactions.append(transaction)
     print("Для обработки выбран XLSX-файл.")
+    return transactions
+
+
+def count_transactions_by_type(transactions, transaction_type):
+    """
+    Функция для подсчета количества банковских операций определенного типа.
+    """
+    counter = Counter(transaction["type"] for transaction in transactions if transaction["type"] == transaction_type)
+    return dict(counter)
 
 
 def main():
@@ -34,11 +68,11 @@ def main():
     choice = input("\nПользователь: ")
 
     if choice == "1":
-        get_transactions_from_json()
+        transactions = get_transactions_from_json()
     elif choice == "2":
-        get_transactions_from_csv()
+        transactions = get_transactions_from_csv()
     elif choice == "3":
-        get_transactions_from_xlsx()
+        transactions = get_transactions_from_xlsx()
     else:
         print("Некорректный выбор.")
         return
@@ -52,9 +86,8 @@ def main():
         print(f'Статус операции "{status}" недоступен.')
         status = input("Введите корректный статус: ").upper()
 
+    filtered_transactions = [t for t in transactions if t["status"].upper() == status]
     print(f'Операции отфильтрованы по статусу "{status}"')
-
-    # Дополнительные шаги фильтрации и сортировки, которые нужно реализовать
 
     print("\nПрограмма: Отсортировать операции по дате? Да/Нет")
     sort_by_date = input("Пользователь: ").lower() == "да"
@@ -62,31 +95,33 @@ def main():
     if sort_by_date:
         print("Программа: Отсортировать по возрастанию или по убыванию?")
         sort_order = input("Пользователь: ").lower()
-        # Логика для сортировки по дате
         if sort_order == "по возрастанию":
-            # Логика для сортировки по возрастанию
-            pass
+            filtered_transactions.sort(key=lambda x: x["date"])
         elif sort_order == "по убыванию":
-            # Логика для сортировки по убыванию
-            pass
+            filtered_transactions.sort(key=lambda x: x["date"], reverse=True)
         else:
             print("Некорректный выбор сортировки.")
 
-    print("\nПрограмма: Выводить только рублевые тразакции? Да/Нет")
+    print("\nПрограмма: Выводить только рублевые транзакции? Да/Нет")
     filter_rub = input("Пользователь: ").lower() == "да"
 
     if filter_rub:
-        # Логика для фильтрации по рублевым транзакциям
-        pass
+        filtered_transactions = [t for t in filtered_transactions if t["currency"] == "RUB"]
 
     print("\nПрограмма: Отфильтровать список транзакций по определенному слову в описании? Да/Нет")
     filter_description = input("Пользователь: ").lower() == "да"
 
     if filter_description:
-        # Логика для фильтрации по описанию
-        pass
+        keyword = input("Введите ключевое слово для фильтрации по описанию: ")
+        filtered_transactions = [t for t in filtered_transactions if keyword in t["description"]]
 
-    # Здесь нужно будет выводить список транзакций или сообщение о пустом списке
+    if filtered_transactions:
+        print("\nПрограмма: Распечатываю итоговый список транзакций...")
+        for transaction in filtered_transactions:
+            print(transaction)
+        print(f"\nВсего банковских операций в выборке: {len(filtered_transactions)}")
+    else:
+        print("Программа: Не найдено ни одной транзакции, подходящей под ваши условия фильтрации.")
 
 
 if __name__ == "__main__":
