@@ -3,48 +3,58 @@ import os
 import pandas as pd
 
 
-def read_csv_file(file_path):
+def read_csv_file(file_path, delimiter=";"):
     """
-    Читает CSV файл и возвращает DataFrame.
+    Читает CSV файл и возвращает список словарей с данными.
 
     Parameters:
     file_path (str): Путь к CSV файлу.
+    delimiter (str): Разделитель, используемый в CSV файле.
 
     Returns:
-    pd.DataFrame: DataFrame с данными из CSV файла.
+    list: Список словарей с данными из CSV файла.
     """
     try:
-        df = pd.read_csv(file_path)
+        df = pd.read_csv(file_path, delimiter=delimiter)
+        transactions = df.to_dict(orient="records")
         print("CSV File Data:")
-        print(df.head())
-        return df
+        print(transactions[:5])
+        return transactions
     except Exception as e:
         print(f"Error reading CSV file: {e}")
         return None
 
 
-def write_to_excel(df, excel_file_path, sheet_name):
+def read_excel_file(file_path, sheet_name, delimiter=";"):
     """
-    Записывает DataFrame в Excel файл.
+    Читает Excel файл и возвращает список словарей с данными.
 
     Parameters:
-    df (pd.DataFrame): DataFrame с данными для записи.
-    excel_file_path (str): Путь к Excel файлу.
-    sheet_name (str): Название листа, куда будут записаны данные.
+    file_path (str): Путь к Excel файлу.
+    sheet_name (str): Название листа, откуда будут читаться данные.
+    delimiter (str): Разделитель, используемый в данных листа.
+
+    Returns:
+    list: Список словарей с данными из Excel файла.
     """
     try:
-        with pd.ExcelWriter(excel_file_path, engine="openpyxl", mode="a") as writer:
-            df.to_excel(writer, sheet_name=sheet_name, index=False)
-        print(f"Data written to {sheet_name} in {excel_file_path}")
+        df = pd.read_excel(file_path, sheet_name=sheet_name)
+        df = df.iloc[:, 0].str.split(delimiter, expand=True)
+        df.columns = ["id", "state", "date", "amount", "currency_name", "currency_code", "from", "to", "description"]
+        transactions = df.to_dict(orient="records")
+        print("Excel File Data:")
+        print(transactions[:5])
+        return transactions
     except Exception as e:
-        print(f"Error writing to Excel file: {e}")
+        print(f"Error reading Excel file: {e}")
+        return None
 
 
 if __name__ == "__main__":
     """
     Главная функция, которая выполняется при запуске скрипта.
 
-    Читает данные из файла CSV и записывает их в файл XLSX.
+    Читает данные из файлов CSV и XLSX и выводит первые 5 записей.
     """
     # Путь к папке data относительно текущего файла
     base_path = os.path.abspath(os.path.join(os.path.dirname(__file__), "..", "data"))
@@ -53,8 +63,7 @@ if __name__ == "__main__":
     sheet_name = "Transactions"
 
     # Чтение данных из CSV файла
-    df_csv = read_csv_file(csv_file_path)
+    transactions_csv = read_csv_file(csv_file_path)
 
-    if df_csv is not None:
-        # Запись данных в Excel файл
-        write_to_excel(df_csv, xlsx_file_path, sheet_name)
+    # Чтение данных из Excel файла
+    transactions_excel = read_excel_file(xlsx_file_path, sheet_name)
