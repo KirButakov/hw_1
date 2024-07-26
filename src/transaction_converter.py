@@ -16,9 +16,10 @@ def convert_transaction_amount(transaction):
     по текущему обменному курсу, используя внешнее API.
 
     Args:
-        transaction (dict): Словарь с ключами 'amount' и 'currency'.
-            'amount' (float): Сумма транзакции.
-            'currency' (str): Валюта транзакции ('USD', 'EUR', 'RUB').
+        transaction (dict): Словарь с ключами 'transaction'.
+            'transaction' (dict): Словарь с ключами 'amount' и 'currency'.
+                'amount' (float): Сумма транзакции.
+                'currency' (str): Валюта транзакции ('USD', 'EUR', 'RUB').
 
     Returns:
         float: Сумма транзакции в рублях.
@@ -26,8 +27,8 @@ def convert_transaction_amount(transaction):
     Raises:
         ValueError: Если валюта не поддерживается или ключ API не установлен.
     """
-    amount = transaction["amount"]
-    currency = transaction["currency"]
+    amount = transaction["transaction"]["amount"]
+    currency = transaction["transaction"]["currency"]
 
     if currency == "RUB":
         return float(amount)

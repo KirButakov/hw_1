@@ -5,55 +5,44 @@ from src.utils import load_transactions_from_json
 
 
 class TestLoadTransactionsFromJson(unittest.TestCase):
-    """
-    Набор тестов для функции load_transactions_from_json.
 
-    Тестирует различные сценарии загрузки данных о финансовых транзакциях из JSON-файла.
-    """
+    @patch("builtins.open", new_callable=mock_open, read_data='[{"transaction": 1}, {"transaction": 2}]')
+    @patch("os.path.exists", return_value=True)
+    def test_load_transactions_success(self, mock_exists, mock_open):
+        file_path = "data/operations.json"
+        expected_data = [{"transaction": 1}, {"transaction": 2}]
 
-    @patch("builtins.open", new_callable=mock_open, read_data='[{"id": 1, "amount": 100}, {"id": 2, "amount": 200}]')
-    def test_load_valid_json(self, mock_file):
-        """
-        Тестирование загрузки корректных данных из JSON-файла.
+        result = load_transactions_from_json(file_path)
 
-        Проверяет, что функция load_transactions_from_json возвращает корректный список транзакций.
-        """
-        transactions = load_transactions_from_json()
-        self.assertEqual(len(transactions), 2)
-        self.assertIsInstance(transactions[0], dict)
-        self.assertEqual(transactions[0]["id"], 1)
-        self.assertEqual(transactions[1]["amount"], 200)
+        self.assertEqual(result, expected_data)
 
-    @patch("builtins.open", new_callable=mock_open, read_data="")
-    def test_load_empty_file(self, mock_file):
-        """
-        Тестирование загрузки данных из пустого JSON-файла.
+    @patch("builtins.open", new_callable=mock_open, read_data="not a valid json")
+    @patch("os.path.exists", return_value=True)
+    def test_load_transactions_json_decode_error(self, mock_exists, mock_open):
+        file_path = "data/operations.json"
 
-        Проверяет, что функция load_transactions_from_json возвращает пустой список при пустом файле.
-        """
-        transactions = load_transactions_from_json()
-        self.assertEqual(transactions, [])
+        result = load_transactions_from_json(file_path)
+
+        self.assertEqual(result, [])
+
+    @patch("builtins.open", new_callable=mock_open, read_data="[]")
+    @patch("os.path.exists", return_value=True)
+    def test_load_transactions_empty_list(self, mock_exists, mock_open):
+        file_path = "data/operations.json"
+
+        result = load_transactions_from_json(file_path)
+
+        self.assertEqual(result, [])
+
+    @patch("os.path.exists", return_value=False)
+    def test_load_transactions_file_not_found(self, mock_exists):
+        file_path = "data/operations.json"
+
+        result = load_transactions_from_json(file_path)
+
+        self.assertEqual(result, [])
 
     @patch("builtins.open", new_callable=mock_open, read_data="{}")
-    def test_load_invalid_json_structure(self, mock_file):
-        """
-        Тестирование загрузки данных из JSON-файла с некорректной структурой.
-
-        Проверяет, что функция load_transactions_from_json возвращает пустой список при некорректной структуре данных.
-        """
-        transactions = load_transactions_from_json()
-        self.assertEqual(transactions, [])
-
-    @patch("builtins.open", side_effect=IOError)
-    def test_file_not_found(self, mock_file):
-        """
-        Тестирование обработки ситуации, когда файл не найден.
-
-        Проверяет, что функция load_transactions_from_json возвращает пустой список при отсутствии файла.
-        """
-        transactions = load_transactions_from_json()
-        self.assertEqual(transactions, [])
-
-
-if __name__ == "__main__":
-    unittest.main()
+    @patch("os.path.exists", return_value=True)
+    def test_load_transactions_not_a_list(self, mock_exists, mock_open):
+        file_path = "data/operations.json"

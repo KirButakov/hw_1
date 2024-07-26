@@ -4,17 +4,18 @@ import os
 from custom_logger import logger
 
 
-def load_transactions_from_json():
+def load_transactions_from_json(file_path):
     """
     Загружает данные о финансовых транзакциях из JSON-файла.
+
+    Args:
+        file_path (str): Путь к JSON-файлу.
 
     Returns:
         list: Список словарей с данными о финансовых транзакциях.
               Возвращает пустой список, если файл не найден, пустой, содержит не список
               или не удалось корректно загрузить данные из файла.
     """
-    file_path = "data/operations.json"  # Путь к файлу в директории data
-
     # Проверяем существование файла
     if not os.path.exists(file_path):
         print(f"File not found: {file_path}")
