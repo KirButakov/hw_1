@@ -1,6 +1,22 @@
+import logging
 import os
 
 import pandas as pd
+
+# Убедимся, что директория для логов существует
+log_directory = os.path.join(os.path.dirname(os.path.abspath(__file__)), "..", "logs")
+if not os.path.exists(log_directory):
+    os.makedirs(log_directory)
+
+# Настройка логирования
+log_file = os.path.join(log_directory, "utils.log")
+logging.basicConfig(
+    level=logging.INFO,
+    format="%(asctime)s - %(name)s - %(levelname)s - %(message)s",
+    handlers=[logging.FileHandler(log_file, mode="w"), logging.StreamHandler()],  # Перезапись файла при каждом запуске
+)
+
+logger = logging.getLogger(__name__)
 
 
 def read_csv_file(file_path, delimiter=";"):
@@ -14,56 +30,12 @@ def read_csv_file(file_path, delimiter=";"):
     Returns:
     list: Список словарей с данными из CSV файла.
     """
+    logger.info(f"Reading CSV file from {file_path} with delimiter '{delimiter}'")
     try:
         df = pd.read_csv(file_path, delimiter=delimiter)
         transactions = df.to_dict(orient="records")
-        print("CSV File Data:")
-        print(transactions[:5])
+        logger.info(f"Successfully read {len(transactions)} transactions from CSV file")
         return transactions
     except Exception as e:
-        print(f"Error reading CSV file: {e}")
+        logger.error(f"Error reading CSV file: {e}")
         return None
-
-
-def read_excel_file(file_path, sheet_name, delimiter=";"):
-    """
-    Читает Excel файл и возвращает список словарей с данными.
-
-    Parameters:
-    file_path (str): Путь к Excel файлу.
-    sheet_name (str): Название листа, откуда будут читаться данные.
-    delimiter (str): Разделитель, используемый в данных листа.
-
-    Returns:
-    list: Список словарей с данными из Excel файла.
-    """
-    try:
-        df = pd.read_excel(file_path, sheet_name=sheet_name)
-        df = df.iloc[:, 0].str.split(delimiter, expand=True)
-        df.columns = ["id", "state", "date", "amount", "currency_name", "currency_code", "from", "to", "description"]
-        transactions = df.to_dict(orient="records")
-        print("Excel File Data:")
-        print(transactions[:5])
-        return transactions
-    except Exception as e:
-        print(f"Error reading Excel file: {e}")
-        return None
-
-
-if __name__ == "__main__":
-    """
-    Главная функция, которая выполняется при запуске скрипта.
-
-    Читает данные из файлов CSV и XLSX и выводит первые 5 записей.
-    """
-    # Путь к папке data относительно текущего файла
-    base_path = os.path.abspath(os.path.join(os.path.dirname(__file__), "..", "data"))
-    csv_file_path = os.path.join(base_path, "transactions.csv")
-    xlsx_file_path = os.path.join(base_path, "transactions_excel.xlsx")
-    sheet_name = "Transactions"
-
-    # Чтение данных из CSV файла
-    transactions_csv = read_csv_file(csv_file_path)
-
-    # Чтение данных из Excel файла
-    transactions_excel = read_excel_file(xlsx_file_path, sheet_name)

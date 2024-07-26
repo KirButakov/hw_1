@@ -1,3 +1,6 @@
+from custom_logger import logger
+
+
 def mask_card_number(card_number: str) -> str:
     """
     Маскирует номер банковской карты, скрывая часть цифр.
@@ -36,3 +39,7 @@ def mask_account_number(account_number: str) -> str:
     # Маскирование номера счета
     masked_number = "**" + account_number[-4:]
     return masked_number
+
+
+def example_function():
+    logger.info("Example function in masks module")

@@ -1,6 +1,8 @@
 import json
 import os
 
+from custom_logger import logger
+
 
 def load_transactions_from_json():
     """
@@ -40,3 +42,9 @@ def load_transactions_from_json():
     except IOError:
         print(f"Error reading file: {file_path}")
         return []
+
+
+def read_csv_file(file_path):
+    logger.info(f"Reading CSV file from {file_path}")
+
+    return []
