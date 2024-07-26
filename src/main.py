@@ -86,7 +86,7 @@ def main():
         print(f'Статус операции "{status}" недоступен.')
         status = input("Введите корректный статус: ").upper()
 
-    filtered_transactions = [t for t in transactions if t["status"].upper() == status]
+    filtered_transactions = [t for t in transactions if t.get("status", "").upper() == status]
     print(f'Операции отфильтрованы по статусу "{status}"')
 
     print("\nПрограмма: Отсортировать операции по дате? Да/Нет")
