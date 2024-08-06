@@ -4,6 +4,8 @@ from collections import Counter
 
 import openpyxl
 
+from processing import filter_by_state
+
 
 def get_transactions_from_json():
     """
@@ -49,7 +51,9 @@ def count_transactions_by_type(transactions, transaction_type):
     """
     Функция для подсчета количества банковских операций определенного типа.
     """
-    counter = Counter(transaction["type"] for transaction in transactions if transaction["type"] == transaction_type)
+    counter = Counter(
+        transaction["type"] for transaction in transactions if transaction.get("type") == transaction_type
+    )
     return dict(counter)
 
 
@@ -86,7 +90,7 @@ def main():
         print(f'Статус операции "{status}" недоступен.')
         status = input("Введите корректный статус: ").upper()
 
-    filtered_transactions = [t for t in transactions if t.get("status", "").upper() == status]
+    filtered_transactions = filter_by_state(transactions, status)
     print(f'Операции отфильтрованы по статусу "{status}"')
 
     print("\nПрограмма: Отсортировать операции по дате? Да/Нет")
@@ -106,14 +110,14 @@ def main():
     filter_rub = input("Пользователь: ").lower() == "да"
 
     if filter_rub:
-        filtered_transactions = [t for t in filtered_transactions if t["currency"] == "RUB"]
+        filtered_transactions = [t for t in filtered_transactions if t.get("currency") == "RUB"]
 
     print("\nПрограмма: Отфильтровать список транзакций по определенному слову в описании? Да/Нет")
     filter_description = input("Пользователь: ").lower() == "да"
 
     if filter_description:
         keyword = input("Введите ключевое слово для фильтрации по описанию: ")
-        filtered_transactions = [t for t in filtered_transactions if keyword in t["description"]]
+        filtered_transactions = [t for t in filtered_transactions if keyword in t.get("description", "")]
 
     if filtered_transactions:
         print("\nПрограмма: Распечатываю итоговый список транзакций...")
