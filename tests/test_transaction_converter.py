@@ -1,57 +1,80 @@
+import json
+import os
 import unittest
-from unittest.mock import patch
+from unittest.mock import mock_open, patch
 
+# Предположим, что наша функция и все необходимые модули находятся в src.transaction_converter
 from src.transaction_converter import convert_transaction_amount
 
 
 class TestConvertTransactionAmount(unittest.TestCase):
+    @patch("src.transaction_converter.fetch_exchange_rate")
+    @patch(
+        "builtins.open",
+        new_callable=mock_open,
+        read_data='[{"operationAmount": {"amount": 100.0, "currency": {"code": "USD"}}}]',
+    )
+    @patch("os.getenv", return_value="dummy_api_key")
+    def test_convert_transaction_amount_usd(self, mock_getenv, mock_open, mock_fetch):
+        mock_fetch.return_value = {"USD_RUB": 74.0}
+
+        # Открываем и читаем данные из файла operations.json
+        current_dir = os.path.dirname(os.path.abspath(__file__))
+        file_path = os.path.join(current_dir, "..", "data", "operations.json")
+        with open(file_path, "r", encoding="utf-8") as file:
+            operations = json.load(file)
+
+        transaction = operations[0]
+        result = convert_transaction_amount(transaction)
+
+        self.assertEqual(result, 7400.0)
 
     @patch("src.transaction_converter.fetch_exchange_rate")
-    def test_convert_usd_to_rub(self, mock_fetch_exchange_rate):
-        mock_fetch_exchange_rate.return_value = {"USD_RUB": 74.5}
+    @patch(
+        "builtins.open",
+        new_callable=mock_open,
+        read_data='[{"operationAmount": {"amount": 100.0, "currency": {"code": "EUR"}}}]',
+    )
+    @patch("os.getenv", return_value="dummy_api_key")
+    def test_convert_transaction_amount_eur(self, mock_getenv, mock_open, mock_fetch):
+        mock_fetch.return_value = {"EUR_RUB": 90.0}
 
-        transaction = {"transaction": {"amount": 100, "currency": "USD"}, "description": "Payment for services"}
+        # Открываем и читаем данные из файла operations.json
+        current_dir = os.path.dirname(os.path.abspath(__file__))
+        file_path = os.path.join(current_dir, "..", "data", "operations.json")
+        with open(file_path, "r", encoding="utf-8") as file:
+            operations = json.load(file)
+
+        transaction = operations[0]
+        result = convert_transaction_amount(transaction)
+
+        self.assertEqual(result, 9000.0)
+
+    @patch("os.getenv", return_value="dummy_api_key")
+    def test_convert_transaction_amount_rub(self, mock_getenv):
+        transaction = {"operationAmount": {"amount": 100.0, "currency": {"code": "RUB"}}}
 
         result = convert_transaction_amount(transaction)
-        expected_result = 100 * 74.5  # 7450.0
 
-        self.assertEqual(result, expected_result)
-
-    @patch("src.transaction_converter.fetch_exchange_rate")
-    def test_convert_eur_to_rub(self, mock_fetch_exchange_rate):
-        mock_fetch_exchange_rate.return_value = {"EUR_RUB": 90.5}
-
-        transaction = {"transaction": {"amount": 100, "currency": "EUR"}, "description": "Payment for services"}
-
-        result = convert_transaction_amount(transaction)
-        expected_result = 100 * 90.5  # 9050.0
-
-        self.assertEqual(result, expected_result)
-
-    def test_convert_rub_to_rub(self):
-        transaction = {"transaction": {"amount": 100, "currency": "RUB"}, "description": "Payment for services"}
-
-        result = convert_transaction_amount(transaction)
-        expected_result = 100.0
-
-        self.assertEqual(result, expected_result)
-
-    def test_unsupported_currency(self):
-        transaction = {"transaction": {"amount": 100, "currency": "GBP"}, "description": "Payment for services"}
-
-        with self.assertRaises(ValueError) as context:
-            convert_transaction_amount(transaction)
-
-        self.assertEqual(str(context.exception), "Unsupported currency: GBP")
+        self.assertEqual(result, 100.0)
 
     @patch("os.getenv", return_value=None)
-    def test_missing_api_key(self, mock_getenv):
-        transaction = {"transaction": {"amount": 100, "currency": "USD"}, "description": "Payment for services"}
+    def test_api_key_not_set(self, mock_getenv):
+        transaction = {"operationAmount": {"amount": 100.0, "currency": {"code": "USD"}}}
 
         with self.assertRaises(ValueError) as context:
             convert_transaction_amount(transaction)
 
-        self.assertEqual(str(context.exception), "API access key is not set")
+        self.assertTrue("API access key is not set" in str(context.exception))
+
+    @patch("os.getenv", return_value="dummy_api_key")
+    def test_unsupported_currency(self, mock_getenv):
+        transaction = {"operationAmount": {"amount": 100.0, "currency": {"code": "GBP"}}}
+
+        with self.assertRaises(ValueError) as context:
+            convert_transaction_amount(transaction)
+
+        self.assertTrue("Unsupported currency: GBP" in str(context.exception))
 
 
 if __name__ == "__main__":

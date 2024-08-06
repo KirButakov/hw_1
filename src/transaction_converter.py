@@ -1,3 +1,4 @@
+import json
 import os
 
 from dotenv import load_dotenv
@@ -16,10 +17,11 @@ def convert_transaction_amount(transaction):
     по текущему обменному курсу, используя внешнее API.
 
     Args:
-        transaction (dict): Словарь с ключами 'transaction'.
-            'transaction' (dict): Словарь с ключами 'amount' и 'currency'.
+        transaction (dict): Словарь с данными о транзакции.
+            'operationAmount' (dict): Словарь с ключами 'amount' и 'currency'.
                 'amount' (float): Сумма транзакции.
-                'currency' (str): Валюта транзакции ('USD', 'EUR', 'RUB').
+                'currency' (dict): Словарь с ключом 'code'.
+                    'code' (str): Валюта транзакции ('USD', 'EUR', 'RUB').
 
     Returns:
         float: Сумма транзакции в рублях.
@@ -27,8 +29,8 @@ def convert_transaction_amount(transaction):
     Raises:
         ValueError: Если валюта не поддерживается или ключ API не установлен.
     """
-    amount = transaction["transaction"]["amount"]
-    currency = transaction["transaction"]["currency"]
+    amount = transaction["operationAmount"]["amount"]
+    currency = transaction["operationAmount"]["currency"]["code"]
 
     if currency == "RUB":
         return float(amount)
@@ -47,3 +49,12 @@ def convert_transaction_amount(transaction):
         return converted_amount
     else:
         raise ValueError(f"Unsupported currency: {currency}")
+
+
+# Определите путь к файлу относительно текущего файла
+current_dir = os.path.dirname(os.path.abspath(__file__))
+file_path = os.path.join(current_dir, "..", "data", "operations.json")
+
+# Чтение данных из файла operations.json
+with open(file_path, "r", encoding="utf-8") as file:
+    operations = json.load(file)
