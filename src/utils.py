@@ -18,7 +18,7 @@ def load_transactions_from_json(file_path):
     """
     # Проверяем существование файла
     if not os.path.exists(file_path):
-        print(f"File not found: {file_path}")
+        logger.error(f"File not found: {file_path}")
         return []
 
     try:
@@ -30,22 +30,35 @@ def load_transactions_from_json(file_path):
                 if isinstance(data, list) and all(isinstance(item, dict) for item in data):
                     # Проверяем, что список данных не пустой
                     if len(data) > 0:
+                        logger.info(f"Successfully loaded transactions from {file_path}")
                         return data
                     else:
-                        print(f"File is empty: {file_path}")
+                        logger.warning(f"File is empty: {file_path}")
                         return []
                 else:
-                    print(f"File does not contain a list of dictionaries: {file_path}")
+                    logger.error(f"File does not contain a list of dictionaries: {file_path}")
                     return []
             except json.JSONDecodeError:
-                print(f"Error decoding JSON from file: {file_path}")
+                logger.error(f"Error decoding JSON from file: {file_path}")
                 return []
     except IOError:
-        print(f"Error reading file: {file_path}")
+        logger.error(f"Error reading file: {file_path}")
         return []
 
 
 def read_csv_file(file_path):
+    """
+    Читает данные из CSV-файла.
+
+    Args:
+        file_path (str): Путь к CSV-файлу.
+
+    Returns:
+        list: Список данных, прочитанных из CSV-файла.
+    """
     logger.info(f"Reading CSV file from {file_path}")
 
+    # Тут должна быть логика чтения CSV-файла
+
+    logger.info(f"Successfully read CSV file from {file_path}")
     return []

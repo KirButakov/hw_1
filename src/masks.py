@@ -14,10 +14,12 @@ def mask_card_number(card_number: str) -> str:
     """
     # Проверка наличия правильного количества цифр в номере карты
     if len(card_number) != 16:
+        logger.error(f"Неверный формат номера карты: {card_number}")
         return "Неверный формат номера карты"
 
     # Маскирование номера карты
     masked_number = card_number[:4] + " " + card_number[4:6] + "** **** " + card_number[-4:]
+    logger.info(f"Маскированный номер карты: {masked_number}")
     return masked_number
 
 
@@ -34,10 +36,12 @@ def mask_account_number(account_number: str) -> str:
     """
     # Проверка наличия правильного количества цифр в номере счета
     if len(account_number) != 6:
+        logger.error(f"Неверный формат номера счета: {account_number}")
         return "Неверный формат номера счета"
 
     # Маскирование номера счета
     masked_number = "**" + account_number[-4:]
+    logger.info(f"Маскированный номер счета: {masked_number}")
     return masked_number
 
 
