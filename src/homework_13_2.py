@@ -1,4 +1,5 @@
 import re
+from collections import Counter
 
 # Функция для фильтрации транзакций по описанию
 def filter_transactions_by_description(transactions, search_string):
@@ -42,7 +43,8 @@ def count_operations_by_category(transactions, categories):
 
     dict: Словарь с количеством операций для каждой категории.
     """
-    category_counts = {category: 0 for category in categories}
+    # Создаем пустой Counter для подсчета категорий
+    category_counts = Counter()
 
     for transaction in transactions:
         description = transaction.get("description", "")
@@ -51,4 +53,4 @@ def count_operations_by_category(transactions, categories):
             if re.search(pattern, description):
                 category_counts[category] += 1
 
-    return category_counts
+    return dict(category_counts)
